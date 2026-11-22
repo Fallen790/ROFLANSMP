@@ -1,0 +1,1361 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Рофлан СМП — Официальный Minecraft Сервер</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800;900&family=Press+Start+2P&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-main: #090b10;
+            --bg-panel: #131722;
+            --bg-slot: #1c2232;
+            --border-dark: #05070a;
+            --border-light: rgba(255, 255, 255, 0.12);
+            --grass-top: #55b93b;
+            --grass-side: #3d8e28;
+            --dirt: #6b4c35;
+            --emerald: #00f588;
+            --emerald-dark: #00a859;
+            --enchant-purple: #b86bff;
+            --discord: #5865F2;
+            --red: #ff3b5c;
+            --red-dark: #b81d38;
+            --orange: #ffaa00;
+            --orange-dark: #b87a00;
+            --gold: #ffd700;
+            --google-blue: #4285F4;
+            --google-blue-dark: #2a56c6;
+            --text: #ffffff;
+            --text-muted: #9aa5b8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text);
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Пиксельная сетка на фоне */
+        .mc-grid {
+            position: fixed;
+            inset: 0;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+            background-size: 32px 32px;
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        /* Летающие сферы опыта (XP Orbs) */
+        .xp-orb {
+            position: fixed;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #d9ff66, #55ff00 60%, #1d8000);
+            box-shadow: 0 0 15px #66ff00, 0 0 30px rgba(102, 255, 0, 0.45);
+            z-index: -1;
+            opacity: 0.5;
+            pointer-events: none;
+            animation: floatOrb 12s infinite ease-in-out alternate;
+        }
+
+        .orb-1 { width: 14px; height: 14px; top: 16%; left: 8%; animation-duration: 9s; }
+        .orb-2 { width: 10px; height: 10px; top: 42%; right: 10%; animation-duration: 13s; }
+        .orb-3 { width: 18px; height: 18px; bottom: 20%; left: 12%; animation-duration: 11s; }
+        .orb-4 { width: 12px; height: 12px; top: 68%; right: 18%; animation-duration: 15s; }
+        .orb-5 { width: 15px; height: 15px; top: 30%; left: 48%; animation-duration: 14s; }
+
+        @keyframes floatOrb {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(25px, -35px) scale(1.15); }
+            100% { transform: translate(-20px, -70px) scale(0.95); }
+        }
+
+        /* Шапка */
+        header {
+            background: rgba(13, 16, 24, 0.9);
+            backdrop-filter: blur(14px);
+            padding: 16px 7%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 3px solid var(--border-dark);
+            box-shadow: 0 4px 25px rgba(0,0,0,0.6);
+        }
+
+        .logo-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Пиксельный блок травы */
+        .grass-icon {
+            width: 30px;
+            height: 30px;
+            background: var(--dirt);
+            border: 2px solid #000;
+            position: relative;
+            box-shadow: inset -2px -2px 0 rgba(0,0,0,0.4);
+            flex-shrink: 0;
+        }
+
+        .grass-icon::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 10px;
+            background: var(--grass-top);
+            border-bottom: 2px solid var(--grass-side);
+        }
+
+        .logo {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 15px;
+            color: var(--emerald);
+            text-shadow: 2px 2px 0px #042916, 0 0 16px rgba(0, 245, 136, 0.45);
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        nav a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 13px;
+            text-transform: uppercase;
+            transition: color 0.2s;
+        }
+
+        nav a:hover { color: var(--emerald); }
+
+        .nav-ds {
+            background: var(--discord);
+            color: #fff !important;
+            padding: 9px 16px;
+            border-radius: 6px;
+            border-bottom: 3px solid #3b44a8;
+            transition: transform 0.15s;
+        }
+
+        .nav-ds:hover { transform: translateY(-2px); }
+
+        /* Главный блок */
+        .hero {
+            padding: 75px 20px 55px;
+            max-width: 980px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .mc-banner {
+            background: var(--bg-panel);
+            border: 2px solid var(--border-dark);
+            border-radius: 16px;
+            padding: 52px 32px 44px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.65), inset 0 1px 0 var(--border-light);
+        }
+
+        .mc-banner::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 10px;
+            background: repeating-linear-gradient(
+                90deg,
+                var(--grass-top) 0px, var(--grass-top) 16px,
+                var(--grass-side) 16px, var(--grass-side) 32px
+            );
+            border-bottom: 4px solid var(--dirt);
+        }
+
+        .online-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--bg-slot);
+            border: 1px solid var(--border-light);
+            padding: 8px 18px;
+            border-radius: 6px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 10px;
+            color: #a3ff66;
+            margin-bottom: 24px;
+        }
+
+        .online-dot {
+            width: 8px;
+            height: 8px;
+            background: #66ff00;
+            box-shadow: 0 0 10px #66ff00;
+        }
+
+        .hero h1 {
+            font-size: clamp(28px, 4.5vw, 48px);
+            font-weight: 900;
+            line-height: 1.2;
+            margin-bottom: 18px;
+            text-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+
+        .hero h1 span {
+            color: var(--emerald);
+            text-shadow: 0 0 25px rgba(0, 245, 136, 0.4);
+        }
+
+        .hero p {
+            color: var(--text-muted);
+            font-size: 16px;
+            max-width: 640px;
+            margin: 0 auto 32px;
+            line-height: 1.65;
+        }
+
+        /* 3D Кнопки в стиле Minecraft */
+        .mc-btns {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .mc-btn {
+            padding: 15px 26px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 800;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-transform: uppercase;
+            transition: all 0.15s ease;
+            position: relative;
+        }
+
+        .mc-btn:hover { transform: translateY(-2px); filter: brightness(1.08); }
+        .mc-btn:active { transform: translateY(2px); }
+
+        .btn-emerald {
+            background: var(--emerald);
+            color: #041f12;
+            border-bottom: 4px solid var(--emerald-dark);
+            box-shadow: 0 8px 25px rgba(0, 245, 136, 0.3);
+        }
+
+        .btn-discord-mc {
+            background: var(--discord);
+            color: #fff;
+            border-bottom: 4px solid #3943a3;
+            box-shadow: 0 8px 25px rgba(88, 101, 242, 0.35);
+        }
+
+        /* Шкала опыта (XP Bar) */
+        .xp-bar-wrap {
+            max-width: 480px;
+            margin: 34px auto 0;
+        }
+
+        .xp-level {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 11px;
+            color: #80ff20;
+            text-shadow: 1px 1px 0 #000;
+            margin-bottom: 6px;
+        }
+
+        .xp-bar {
+            height: 10px;
+            background: #0a0c10;
+            border: 2px solid #000;
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .xp-fill {
+            width: 85%;
+            height: 100%;
+            background: linear-gradient(90deg, #44b800, #8cff1a);
+            box-shadow: 0 0 12px #8cff1a;
+        }
+
+        /* Секции */
+        section {
+            padding: 55px 7%;
+            max-width: 1140px;
+            margin: 0 auto;
+        }
+
+        .sec-head {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .sec-tag {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 10px;
+            color: var(--enchant-purple);
+            margin-bottom: 12px;
+            display: inline-block;
+            text-shadow: 0 0 10px rgba(184, 107, 255, 0.5);
+        }
+
+        .sec-head h2 {
+            font-size: 32px;
+            font-weight: 900;
+            margin-bottom: 8px;
+        }
+
+        .sec-head p { color: var(--text-muted); font-size: 15px; }
+
+        /* Карточки разбана и размута с эффектом зачарования */
+        .shop-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+            gap: 26px;
+        }
+
+        .enchant-card {
+            background: var(--bg-panel);
+            border: 2px solid var(--border-dark);
+            border-radius: 14px;
+            padding: 32px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.45), inset 0 1px 0 var(--border-light);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.25s ease;
+        }
+
+        .enchant-card:hover { transform: translateY(-6px); }
+
+        .enchant-card::after {
+            content: "";
+            position: absolute;
+            top: -50%; left: -60%;
+            width: 45%; height: 200%;
+            background: linear-gradient(90deg, transparent, rgba(184, 107, 255, 0.16), transparent);
+            transform: rotate(25deg);
+            animation: glint 5s infinite linear;
+            pointer-events: none;
+        }
+
+        @keyframes glint {
+            0% { left: -60%; }
+            45%, 100% { left: 140%; }
+        }
+
+        .item-slot {
+            width: 68px;
+            height: 68px;
+            background: var(--bg-slot);
+            border: 3px solid #090b10;
+            box-shadow: inset 2px 2px 0 rgba(0,0,0,0.5), inset -2px -2px 0 rgba(255,255,255,0.08);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 34px;
+            margin-bottom: 20px;
+        }
+
+        .enchant-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--enchant-purple);
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .enchant-card h3 {
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+
+        .enchant-card p {
+            color: var(--text-muted);
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+
+        .price-val {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 22px;
+            color: var(--gold);
+            text-shadow: 2px 2px 0 #000;
+            margin-bottom: 20px;
+        }
+
+        .btn-red {
+            background: var(--red);
+            color: #fff;
+            border-bottom: 4px solid var(--red-dark);
+            width: 100%;
+            box-shadow: 0 8px 20px rgba(255, 59, 92, 0.3);
+        }
+
+        .btn-orange {
+            background: var(--orange);
+            color: #1c1200;
+            border-bottom: 4px solid var(--orange-dark);
+            width: 100%;
+            box-shadow: 0 8px 20px rgba(255, 170, 0, 0.3);
+        }
+
+        /* Раздел Google Формы (Апелляция на разбан и размут) */
+        .appeal-card {
+            background: var(--bg-panel);
+            border: 2px solid var(--border-dark);
+            border-radius: 14px;
+            padding: 36px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.45), inset 0 1px 0 var(--border-light);
+        }
+
+        .appeal-card::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 8px;
+            background: repeating-linear-gradient(
+                90deg,
+                var(--grass-top) 0px, var(--grass-top) 16px,
+                var(--grass-side) 16px, var(--grass-side) 32px
+            );
+            border-bottom: 3px solid var(--dirt);
+        }
+
+        .appeal-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 24px;
+            flex-wrap: wrap;
+            margin-bottom: 28px;
+        }
+
+        .appeal-info {
+            max-width: 650px;
+        }
+
+        .appeal-info h3 {
+            font-size: 23px;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+
+        .appeal-info p {
+            color: var(--text-muted);
+            font-size: 14px;
+            line-height: 1.65;
+            margin-bottom: 16px;
+        }
+
+        .appeal-steps {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .step-chip {
+            background: var(--bg-slot);
+            border: 1px solid var(--border-light);
+            padding: 7px 13px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #e2e8f0;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .step-chip span {
+            color: var(--emerald);
+            font-weight: 900;
+        }
+
+        .forms-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .form-box {
+            background: var(--bg-slot);
+            border: 2px solid var(--border-dark);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: inset 0 1px 0 var(--border-light);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .form-box-head {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 12px;
+        }
+
+        .form-mini-icon {
+            width: 46px;
+            height: 46px;
+            border-radius: 8px;
+            background: var(--bg-panel);
+            border: 2px solid #090b10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            flex-shrink: 0;
+        }
+
+        .form-box h4 {
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        .form-box p {
+            color: var(--text-muted);
+            font-size: 13px;
+            line-height: 1.55;
+            margin-bottom: 20px;
+        }
+
+        .form-btns {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .btn-google-form {
+            background: var(--google-blue);
+            color: #fff;
+            border-bottom: 4px solid var(--google-blue-dark);
+            width: 100%;
+            font-size: 13px;
+            padding: 13px 18px;
+            box-shadow: 0 6px 18px rgba(66, 133, 244, 0.3);
+        }
+
+        .btn-toggle-embed {
+            background: var(--bg-panel);
+            color: #cbd5e1;
+            border: 1px solid var(--border-light);
+            border-bottom: 3px solid #07090d;
+            width: 100%;
+            padding: 11px;
+            font-size: 12px;
+        }
+
+        .btn-toggle-embed:hover {
+            color: #fff;
+            border-color: rgba(255,255,255,0.3);
+        }
+
+        .embed-container {
+            display: none;
+            margin-top: 26px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-light);
+        }
+
+        .embed-container.open {
+            display: block;
+        }
+
+        .embed-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+
+        .embed-header span {
+            font-weight: 800;
+            font-size: 15px;
+            color: var(--emerald);
+        }
+
+        .btn-close-embed {
+            background: var(--bg-slot);
+            color: #fff;
+            border: 1px solid var(--border-light);
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .embed-container iframe {
+            width: 100%;
+            height: 620px;
+            border: 2px solid var(--border-dark);
+            border-radius: 10px;
+            background: #ffffff;
+        }
+
+        /* Книга правил */
+        .rules-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+
+        .tab-btn {
+            background: var(--bg-slot);
+            color: var(--text-muted);
+            border: 2px solid var(--border-dark);
+            border-bottom: 4px solid #07090d;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .tab-btn:hover { color: #fff; }
+        .tab-btn.active {
+            background: var(--emerald);
+            color: #041f12;
+            border-bottom-color: var(--emerald-dark);
+        }
+
+        .rules-book {
+            background: var(--bg-panel);
+            border: 2px solid var(--border-dark);
+            border-radius: 14px;
+            padding: 10px 26px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.45), inset 0 1px 0 var(--border-light);
+        }
+
+        .rule-row {
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .rule-row:last-child { border-bottom: none; }
+
+        .rule-left {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex: 1;
+            min-width: 260px;
+        }
+
+        .rule-meta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .rule-num {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 10px;
+            background: var(--bg-slot);
+            color: var(--emerald);
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: 1px solid rgba(0, 245, 136, 0.3);
+        }
+
+        .rule-cat {
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: var(--text-muted);
+            background: rgba(255, 255, 255, 0.05);
+            padding: 4px 10px;
+            border-radius: 4px;
+        }
+
+        .rule-desc {
+            font-size: 15px;
+            font-weight: 600;
+            color: #f1f5f9;
+            line-height: 1.5;
+        }
+
+        .rule-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .punish-badge {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 800;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .punish-ban {
+            background: rgba(255, 59, 92, 0.15);
+            color: #ff6b84;
+            border: 1px solid rgba(255, 59, 92, 0.35);
+        }
+
+        .punish-mute {
+            background: rgba(255, 170, 0, 0.15);
+            color: #ffc247;
+            border: 1px solid rgba(255, 170, 0, 0.35);
+        }
+
+        .punish-nick {
+            background: rgba(184, 107, 255, 0.15);
+            color: #d09eff;
+            border: 1px solid rgba(184, 107, 255, 0.35);
+        }
+
+        .duration-badge {
+            background: var(--bg-slot);
+            color: #cbd5e1;
+            border: 1px solid var(--border-light);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        /* Подвал */
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            border-top: 2px solid var(--border-dark);
+            color: var(--text-muted);
+            font-size: 13px;
+            margin-top: 30px;
+        }
+
+        /* Модальное окно (Интерфейс наковальни) */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(4, 5, 8, 0.85);
+            backdrop-filter: blur(6px);
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+            padding: 20px;
+        }
+
+        .anvil-box {
+            background: var(--bg-panel);
+            border: 3px solid #000;
+            box-shadow: inset 0 2px 0 rgba(255,255,255,0.12), 0 25px 50px rgba(0,0,0,0.8);
+            border-radius: 12px;
+            padding: 32px;
+            width: 100%;
+            max-width: 430px;
+            text-align: center;
+        }
+
+        .anvil-box h3 { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+        .anvil-box p { color: var(--text-muted); font-size: 13px; margin-bottom: 20px; }
+
+        .anvil-input {
+            width: 100%;
+            padding: 15px;
+            background: #090b10;
+            border: 2px solid #2d3548;
+            border-radius: 6px;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            outline: none;
+        }
+
+        .anvil-input:focus { border-color: var(--emerald); }
+
+        .anvil-btns { display: flex; gap: 12px; }
+        .btn-gray { background: #2c3344; color: #fff; border-bottom: 4px solid #181c26; flex: 1; }
+        .btn-confirm { background: var(--emerald); color: #041f12; border-bottom: 4px solid var(--emerald-dark); flex: 1.4; }
+
+        /* Уведомление в стиле Достижения (Advancement) */
+        .advancement {
+            position: fixed;
+            top: 85px;
+            right: 25px;
+            background: #1b202c;
+            border: 3px solid #000;
+            box-shadow: inset 0 0 0 2px #4c566a, 0 10px 25px rgba(0,0,0,0.6);
+            border-radius: 8px;
+            padding: 12px 18px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            transform: translateX(130%);
+            transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+            z-index: 300;
+        }
+
+        .advancement.show { transform: translateX(0); }
+        .adv-icon { font-size: 28px; }
+        .adv-title { color: var(--gold); font-size: 12px; font-weight: 800; }
+        .adv-desc { color: #fff; font-size: 13px; font-weight: 600; }
+
+        @media (max-width: 780px) {
+            nav a:not(.nav-ds) { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="mc-grid"></div>
+    <div class="xp-orb orb-1"></div>
+    <div class="xp-orb orb-2"></div>
+    <div class="xp-orb orb-3"></div>
+    <div class="xp-orb orb-4"></div>
+    <div class="xp-orb orb-5"></div>
+
+    <header>
+        <div class="logo-wrap">
+            <div class="grass-icon"></div>
+            <div class="logo" id="site-logo">Рофлан СМП</div>
+        </div>
+        <nav>
+            <a href="#shop">Магазин</a>
+            <a href="#appeal">Заявки (Google Форма)</a>
+            <a href="#rules">Правила</a>
+            <a href="#" class="nav-ds ds-link" target="_blank">Discord</a>
+        </nav>
+    </header>
+
+    <div class="hero">
+        <div class="mc-banner">
+            <div class="online-badge">
+                <span class="online-dot"></span>
+                <span id="server-version">ОНЛАЙН • 1.21.11</span>
+            </div>
+            <h1>Твоё легендарное выживание на <span id="hero-name">Рофлан СМП</span></h1>
+            <p>Уникальная атмосфера, ламповое выживание, честное и отзывчивая администрация. Копируй IP в один клик и залетай играть!</p>
+            
+            <div class="mc-btns">
+                <button class="mc-btn btn-emerald" onclick="copyIP()">⛏️ IP:RoflanSMP.ru-mc.ru <span id="ip-text"></span></button>
+                <a href="#" class="mc-btn btn-discord-mc ds-link" target="_blank">💬 Наш Discord</a>
+            </div>
+
+            <div class="xp-bar-wrap">
+                <div class="xp-level">version 1.21.11</div>
+                <div class="xp-bar"><div class="xp-fill"></div></div>
+            </div>
+        </div>
+    </div>
+
+    <section id="shop">
+        <div class="sec-head">
+            <span class="sec-tag">★ ДОНАТ МАГАЗИН ★</span>
+            <h2>Снятие наказаний</h2>
+            <p>Цены на разбан и размут </p>
+        </div>
+
+        <div class="shop-grid">
+            <div class="enchant-card">
+                <div>
+                    <div class="item-slot">🔓</div>
+                    <span class="enchant-label">✦ Снятие блокировки I</span>
+                    <h3>Купить разбан</h3>
+                    <p>Мгновенное снятие бана аккаунта на сервере Рофлан СМП.Сразу после оплаты доступ в игру восстановиться автоматически</p>
+                </div>
+                <div>
+                    <div class="price-val" id="unban-price-display">80 руб</div>
+                    <button class="mc-btn btn-red" onclick="openBuyModal('unban')">Разбан</button>
+                </div>
+            </div>
+
+            <div class="enchant-card">
+                <div>
+                    <div class="item-slot">🔊</div>
+                    <span class="enchant-label">✦ Свобода слова I</span>
+                    <h3>Купить размут</h3>
+                    <p>Моментальное снятие мута в чате. Возвращает возможность общаться с игроками, писать в ЛС и торговать.</p>
+                </div>
+                <div>
+                    <div class="price-val" id="unmute-price-display">30 руб</div>
+                    <button class="mc-btn btn-orange" onclick="openBuyModal('unmute')">Размут</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="appeal">
+        <div class="sec-head">
+            <span class="sec-tag">📝 АПЕЛЛЯЦИЯ НАКАЗАНИЙ</span>
+            <h2>Google Форма на разбан и размут</h2>
+            <p>Считаешь, что наказание выдано по ошибке? Подай бесплатную заявку на пересмотр</p>
+        </div>
+
+        <div class="appeal-card">
+            <div class="appeal-top">
+                <div class="appeal-info">
+                    <h3>Подача заявки на снятие бана или мута</h3>
+                    <p>Выбери нужную анкету ниже. Администрация проекта рассмотрит твою заявку в течение 24 часов и сообщит решение в Discord.</p>
+                    <div class="appeal-steps">
+                        <div class="step-chip"><span>1.</span> Укажи точный ник и Discord</div>
+                        <div class="step-chip"><span>2.</span> Прикрепи скриншот / видео</div>
+                        <div class="step-chip"><span>3.</span> Опиши ситуацию без оскорблений</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="forms-grid">
+                <!-- Форма на разбан -->
+                <div class="form-box">
+                    <div>
+                        <div class="form-box-head">
+                            <div class="form-mini-icon">🛡️</div>
+                            <h4>Заявка на разбан</h4>
+                        </div>
+                        <p>Заполни эту Google Форму, если твой аккаунт заблокировали на сервере или в Discord по ошибке.</p>
+                    </div>
+                    <div class="form-btns">
+                        <a href="https://forms.gle/FErAZAJdqCm1AYCA8" id="unbanFormLink" target="_blank" class="mc-btn btn-google-form">Открыть форму на разбан ↗</a>
+                        <button class="mc-btn btn-toggle-embed" onclick="openEmbedForm('unban')">Заполнить прямо на сайте ▼</button>
+                    </div>
+                </div>
+
+                <!-- Форма на размут -->
+                <div class="form-box">
+                    <div>
+                        <div class="form-box-head">
+                            <div class="form-mini-icon">💬</div>
+                            <h4>Заявка на размут</h4>
+                        </div>
+                        <p>Заполни эту Google Форму, если тебе выдали мут в игровом чате или голосовых каналах несправедливо.</p>
+                    </div>
+                    <div class="form-btns">
+                        <a href="https://forms.gle/FErAZAJdqCm1AYCA8" id="unmuteFormLink" target="_blank" class="mc-btn btn-google-form">Открыть форму на размут ↗</a>
+                        <button class="mc-btn btn-toggle-embed" onclick="openEmbedForm('unmute')">Заполнить прямо на сайте ▼</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="embed-container" id="embedContainer">
+                <div class="embed-header">
+                    <span id="embedTitle">Заполнение Google Формы</span>
+                    <button class="btn-close-embed" onclick="closeEmbedForm()">Закрыть ✕</button>
+                </div>
+                <iframe id="googleFormIframe" src="" loading="lazy">Загрузка формы...</iframe>
+            </div>
+        </div>
+    </section>
+
+    <section id="rules">
+        <div class="sec-head">
+            <span class="sec-tag">📖 КНИГА ПРАВИЛ</span>
+            <h2>Правила проекта и Discord</h2>
+            <p>Выбери нужный раздел или просмотри полный список правил</p>
+        </div>
+
+        <div class="rules-tabs">
+            <button class="tab-btn active" onclick="filterRules('all', this)">Все правила</button>
+            <button class="tab-btn" onclick="filterRules('osnova', this)">Основа (0.1–0.5)</button>
+            <button class="tab-btn" onclick="filterRules('chat', this)">Чат (1.0–1.7)</button>
+            <button class="tab-btn" onclick="filterRules('voice', this)">Голосовые (2.0–2.1)</button>
+            <button class="tab-btn" onclick="filterRules('profile', this)">Профиль (3.0–3.1)</button>
+        </div>
+
+        <div class="rules-book">
+            <div class="rule-row" data-cat="osnova">
+                <div class="rule-left">
+                    <div class="rule-meta">
+                        <span class="rule-num">ПРАВИЛО 0.1</span>
+                        <span class="rule-cat">ОСНОВА</span>
+                    </div>
+                    <div class="rule-desc">Ответственность за вашу учетную запись несете только вы.</div>
+                </div>
+            </div>
+
+            <div class="rule-row" data-cat="osnova">
+                <div class="rule-left">
+                    <div class="rule-meta">
+                        <span class="rule-num">ПРАВИЛО 0.2</span>
+                        <span class="rule-cat">ОСНОВА</span>
+                    </div>
+                    <div class="rule-desc">Незнание правил не освобождает вас от ответственности.</div>
+                </div>
+            </div>
+
+            <div class="rule-row" data-cat="osnova">
+                <div class="rule-left">
+                    <div class="rule-meta">
+                        <span class="rule-num">ПРАВИЛО 0.3</span>
+                        <span class="rule-cat">ОСНОВА</span>
+                    </div>
+                    <div class="rule-desc">Администрация всегда права.</div>
+                </div>
+            </div>
+
+            <div class="rule-row" data-cat="osnova">
+                <div class="rule-left">
+                    <div class="rule-meta">
+                        <span class="rule-num">ПРАВИЛО 0.4</span>
+                        <span class="rule-cat">ОСНОВА</span>
+                    </div>
+                    <div class="rule-desc">Администрация имеет право выдать наказание за деяние, которого нет в списке правил, если посчитает нужным.</div>
+                </div>
+            </div>
+
+            <div class="rule-row" data-cat="osnova">
+                <div class="rule-left">
+                    <div class="rule-meta">
+                        <span class="rule-num">ПРАВИЛО 0.5</span>
+                        <span class="rule-cat">ОСНОВА</span>
+                    </div>
+                    <div class="rule-desc">За неоднократное нарушение правил выдается более суровое наказание.</div>
+                </div>
+            </div>
+
+            <div class="rule-row" data-cat="chat">
+                <div class="rule-left">
+                    <div class="rule-meta">
+                        <span class="rule-num">ПРАВИЛО 1.0</span>
+                        <span class="rule-cat">ЧАТ</span>
+                    </div>
+                    <div class="rule-desc">Реклама.</div>
+                </div>
+                <div class="rule-right">
+                    <span class="punish-badge punish-ban">🔨 Наказание: Бан</span>
+                    <span class="duration-badge">⏳ Навсегда</span>
+                </div>
+            </div>
+
+            <div class="rule-row" data-cat="chat">
+                <div class="rule-left">
+                    <div class="rule-meta">
+                        <span class="rule-num">ПРАВИЛО 1.1</span>
+                        <span class="rule-cat">ЧАТ</span>
+                    </div>
+                    <div class="rule-desc">NSFW-контент.</div>
+                </div>
+                <div class="rule-right">
+                    <span class="punish-badge punish-ban">🔨 Наказание: Бан</span>
+                    <span class="duration-badge">⏳ Навсегда</span>
+                </div>
+            </div>
+
+            <div class="rule-row" data-cat="chat">
+                <div class="rule-left">
+                    <div class="rule-meta">
+                        <span class="rule-num">ПРАВИЛО 1.2</span>
+                        <span class="rule-cat">ЧАТ</span>
+                    </div>
+                    <div class="rule-desc">Флуд.</div>
+                </div>
+                <div class="rule-right">
+                    <span class="punish-badge punish-mute">🔇 Наказание: Мут</span>
+                    <span class="duration-badge">⏳ 15 мин</span>
+                </div>
+            </div>
+
+            <div class="rule-row" data-cat="chat">
+                <div class="rule-left">
+                    <div class="rule-meta">
+                        <span class="rule-num">ПРАВИЛО 1.3</span>
+                        <span class="rule-cat">ЧАТ</span>
+                    </div>
+                    <div class="rule-desc">Упоминания пользователей, ролей без причин.</div>
+                </div>
+                <div class="rule-right">
+                    <span class="punish-badge punish-mute">🔇 Наказание: Мут</span>
+                    <span class="duration-badge">⏳ 30 мин</span>
+                </div>
+            </div>
+
+            <div class="rule-row" data-cat="chat">
+                <div class="rule-left">
+                    <div class="rule-meta">
+                        <span class="rule-num">ПРАВИЛО 1.4</span>
+                        <span class="rule-cat">ЧАТ</span>
+                    </div>
+                    <div class="rule-desc">Обход наказания.</div>
+                </div>
+                <div class="rule-right">
+                    <span class="punish-badge punish-ban">🔨 Наказание: Бан</span>
+                    <span class="duration-badge">⏳ 1 день</span>
+                </div>
+            </div>
+
+            <div class="rule-row" data-cat="chat">
+                <div class="rule-left">
+                    <div class="rule-meta">
+                        <span class="rule-num">ПРАВИЛО 1.5</span>
+                        <span class="rule-cat">ЧАТ</span>
+                    </div>
+                    <div class="rule-desc">Дискриминация по расовым, религиозным, политическим и др. признакам.</div>
+                </div>
+                <div class="rule-right">
+                    <span class="punish-badge punish-mute">🔇 Наказание: Мут</span>
+                    <span class="duration-badge">⏳ 2 часа</span>
+                </div>
+            </div>
+
+            <div class="rule-row" data-cat="chat">
+                <div class="rule-left">
+                    <div class="rule-meta">
+                        <span class="rule-num">ПРАВИЛО 1.6</span>
+                        <span class="rule-cat">ЧАТ</span>
+                    </div>
+                    <div class="rule-desc">Писать символы, которые могут ломать интерфейс Discord.</div>
+                </div>
+                <div class="rule-right">
+                    <span class="punish-badge punish-mute">🔇 Наказание: Мут</span>
+                    <span class="duration-badge">⏳ 5 мин</span>
+                </div>
+            </div>
+
+            <div class="rule-row" data-cat="chat">
+                <div class="rule-left">
+                    <div class="rule-meta">
+                        <span class="rule-num">ПРАВИЛО 1.7</span>
+                        <span class="rule-cat">ЧАТ</span>
+                    </div>
+                    <div class="rule-desc">Злоупотребление оскорблениями сервера, администрации.</div>
+                </div>
+                <div class="rule-right">
+                    <span class="punish-badge punish-mute">🔇 Наказание: Мут</span>
+                    <span class="duration-badge">⏳ 15 мин</span>
+                </div>
+            </div>
+
+            <div class="rule-row" data-cat="voice">
+                <div class="rule-left">
+                    <div class="rule-meta">
+                        <span class="rule-num">ПРАВИЛО 2.0</span>
+                        <span class="rule-cat">ГОЛОСОВЫЕ КОМНАТЫ</span>
+                    </div>
+                    <div class="rule-desc">Реклама.</div>
+                </div>
+                <div class="rule-right">
+                    <span class="punish-badge punish-ban">🔨 Наказание: Бан</span>
+                    <span class="duration-badge">⏳ Навсегда</span>
+                </div>
+            </div>
+
+            <div class="rule-row" data-cat="voice">
+                <div class="rule-left">
+                    <div class="rule-meta">
+                        <span class="rule-num">ПРАВИЛО 2.1</span>
+                        <span class="rule-cat">ГОЛОСОВЫЕ КОМНАТЫ</span>
+                    </div>
+                    <div class="rule-desc">NSFW-контент.</div>
+                </div>
+                <div class="rule-right">
+                    <span class="punish-badge punish-ban">🔨 Наказание: Бан</span>
+                    <span class="duration-badge">⏳ Навсегда</span>
+                </div>
+            </div>
+
+            <div class="rule-row" data-cat="profile">
+                <div class="rule-left">
+                    <div class="rule-meta">
+                        <span class="rule-num">ПРАВИЛО 3.0</span>
+                        <span class="rule-cat">ПРОФИЛЬ</span>
+                    </div>
+                    <div class="rule-desc">NSFW-контент в профиле.</div>
+                </div>
+                <div class="rule-right">
+                    <span class="punish-badge punish-ban">🔨 Наказание: Бан</span>
+                    <span class="duration-badge">⏳ Навсегда</span>
+                </div>
+            </div>
+
+            <div class="rule-row" data-cat="profile">
+                <div class="rule-left">
+                    <div class="rule-meta">
+                        <span class="rule-num">ПРАВИЛО 3.1</span>
+                        <span class="rule-cat">ПРОФИЛЬ</span>
+                    </div>
+                    <div class="rule-desc">Никнейм, в котором написано название ролей или @everyone.</div>
+                </div>
+                <div class="rule-right">
+                    <span class="punish-badge punish-nick">✏️ Наказание: Смена ника</span>
+                    <span class="duration-badge">⏳ Навсегда</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>© 2026 <span id="footer-name">Рофлан СМП</span>. Все права защищены. Не является официальным продуктом Mojang.</p>
+    </footer>
+
+    <div class="modal" id="buyModal">
+        <div class="anvil-box">
+            <h3 id="modalTitle">Покупка услуги</h3>
+            <p>Введи точный игровой никнейм, чтобы система сняла наказание</p>
+            <input type="text" class="anvil-input" id="nickInput" placeholder="Никнейм в игре...">
+            <div class="anvil-btns">
+                <button class="mc-btn btn-gray" onclick="closeBuyModal()">Отмена</button>
+                <button class="mc-btn btn-confirm" onclick="confirmBuy()">Оплатить</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="advancement" id="advancement">
+        <div class="adv-icon">💎</div>
+        <div>
+            <div class="adv-title" id="advTitle">Достижение получено!</div>
+            <div class="adv-desc" id="advDesc">IP скопирован в буфер</div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // НАСТРОЙКИ ТВОЕГО ПРОЕКТА (МЕНЯЙ ЗДЕСЬ)
+        // ==========================================
+        const CONFIG = {
+            serverName: "Рофлан СМП",                          // Название сервера
+            serverIP: "play.roflansmp.ru",                     // IP адрес
+            version: "ОНЛАЙН • 1.16.5 — 1.21",                 // Статус сверху
+            discordUrl: "https://discord.gg/твой_код",            // Ссылка на Discord
+            
+            // Ссылки на твои Google Формы:
+            unbanFormUrl: "https://docs.google.com/forms/d/e/ТВОЯ_ФОРМА_РАЗБАН/viewform",
+            unmuteFormUrl: "https://docs.google.com/forms/d/e/ТВОЯ_ФОРМА_РАЗМУТ/viewform",
+
+            unbanPrice: "80 руб",                              // Цена разбана
+            unbanPayLink: "https://easydonate.ru/",            // Ссылка на оплату разбана
+
+            unmutePrice: "30 руб",                             // Цена размута
+            unmutePayLink: "https://easydonate.ru/"            // Ссылка на оплату размута
+        };
+        // ==========================================
+
+        document.title = `${CONFIG.serverName} — Официальный Minecraft Сервер`;
+        document.getElementById("site-logo").innerText = CONFIG.serverName;
+        document.getElementById("hero-name").innerText = CONFIG.serverName;
+        document.getElementById("footer-name").innerText = CONFIG.serverName;
+        document.getElementById("ip-text").innerText = CONFIG.serverIP;
+        document.getElementById("server-version").innerText = CONFIG.version;
+        document.getElementById("unban-price-display").innerText = CONFIG.unbanPrice;
+        document.getElementById("unmute-price-display").innerText = CONFIG.unmutePrice;
+
+        document.getElementById("unbanFormLink").href = CONFIG.unbanFormUrl;
+        document.getElementById("unmuteFormLink").href = CONFIG.unmuteFormUrl;
+        document.querySelectorAll(".ds-link").forEach(el => el.href = CONFIG.discordUrl);
+
+        // Открытие Google Формы (разбан или размут) прямо внутри страницы
+        function openEmbedForm(type) {
+            const container = document.getElementById("embedContainer");
+            const iframe = document.getElementById("googleFormIframe");
+            const title = document.getElementById("embedTitle");
+
+            const baseUrl = type === 'unban' ? CONFIG.unbanFormUrl : CONFIG.unmuteFormUrl;
+            title.innerText = type === 'unban' ? "📝 Google Форма: Заявка на разбан" : "📝 Google Форма: Заявка на размут";
+
+            const separator = baseUrl.includes("?") ? "&" : "?";
+            iframe.src = baseUrl + separator + "embedded=true";
+
+            container.classList.add("open");
+            container.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
+
+        function closeEmbedForm() {
+            document.getElementById("embedContainer").classList.remove("open");
+        }
+
+        // Фильтрация правил по категориям
+        function filterRules(category, btn) {
+            document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+
+            document.querySelectorAll(".rule-row").forEach(row => {
+                if (category === "all" || row.dataset.cat === category) {
+                    row.style.display = "flex";
+                } else {
+                    row.style.display = "none";
+                }
+            });
+        }
+
+        function showAdvancement(title, desc) {
+            const adv = document.getElementById("advancement");
+            document.getElementById("advTitle").innerText = title;
+            document.getElementById("advDesc").innerText = desc;
+            adv.classList.add("show");
+            setTimeout(() => adv.classList.remove("show"), 3200);
+        }
+
+        function copyIP() {
+            navigator.clipboard.writeText(CONFIG.serverIP).then(() => {
+                showAdvancement("Достижение получено!", `IP ${CONFIG.serverIP} скопирован`);
+            });
+        }
+
+        let currentProduct = "";
+        function openBuyModal(type) {
+            currentProduct = type;
+            document.getElementById("modalTitle").innerText = type === 'unban'
+                ? `Разбан (${CONFIG.unbanPrice})`
+                : `Размут (${CONFIG.unmutePrice})`;
+            document.getElementById("buyModal").style.display = "flex";
+        }
+
+        function closeBuyModal() {
+            document.getElementById("buyModal").style.display = "none";
+        }
+
+        function confirmBuy() {
+            const nick = document.getElementById("nickInput").value.trim();
+            if (!nick) {
+                showAdvancement("Ошибка ввода!", "Укажи свой игровой ник");
+                return;
+            }
+            const url = currentProduct === 'unban' ? CONFIG.unbanPayLink : CONFIG.unmutePayLink;
+            window.open(url, "_blank");
+            closeBuyModal();
+        }
+    </script>
+</body>
+</html>
